@@ -33,16 +33,20 @@ func Authenticate( username string,
   username = dbConn.Escape( username )
   password := dbConn.Escape( passwordHash )
 
+  fmt.Printf( "Authenticating user: '%s:%s'\n", username, password )
+
   err := dbConn.Query( "SELECT * FROM users WHERE nick = '"+username+"' AND password = '"+password+"' limit 1" )
   if err != nil {
+    fmt.Printf( "Encountered error: %s", err.String() )
     return NewAuthenticationReply( false, -1, "" ), err
   }
 
   result, err := dbConn.UseResult()
+  defer dbConn.FreeResult()
   if err != nil {
+    fmt.Printf( "Encountered error: %s", err.String() )
     return NewAuthenticationReply( false, -1, "" ), err
   }
-  /*defer result.Free()*/
 
   // Fetch the row
   row := result.FetchMap()
@@ -54,7 +58,7 @@ func Authenticate( username string,
 
     return NewAuthenticationReply( true, id, nick ), nil
   } else {
-    fmt.Printf( "No rows found || Bad username and/or password.\n" )
+    fmt.Print( "No rows found || Bad username and/or password.\n" )
   }
 
   return NewAuthenticationReply( false, -1, "" ), os.NewError( "Authentication failed." )
