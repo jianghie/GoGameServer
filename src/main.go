@@ -28,13 +28,14 @@ func HandleNewClient( conn *net.Conn, dbConn *mysql.Client, userList *list.List)
   authReply, err := Authenticate( username, password, dbConn )
   if err != nil {
     (*conn).Close()
+    fmt.Printf( "Error when authenticating: %s\n", err.String() )
   }
 
   if authReply.Authenticated {
     fmt.Printf( "User '%s' logged in.\n", username )
   } else {
     (*conn).Close()
-    fmt.Print( "DROPPED..\n" )
+    fmt.Print( "Dropped connection..\n" )
   }
 }
 

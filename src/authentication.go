@@ -16,11 +16,8 @@ type AuthenticationReply struct {
 
 func NewAuthenticationReply( authenticated bool,
                              id int64,
-                             username string ) AuthenticationReply {
-  var r AuthenticationReply
-  r.Authenticated = authenticated
-  r.Id            = id
-  r.Username      = username
+                             username string ) *AuthenticationReply {
+  r := &AuthenticationReply{ authenticated, id, username }
   return r
 }
 
@@ -28,24 +25,25 @@ func NewAuthenticationReply( authenticated bool,
 
 func Authenticate( username string,
                    passwordHash string,
-                   dbConn *mysql.Client ) (AuthenticationReply, os.Error) {
+                   dbConn *mysql.Client ) (reply *AuthenticationReply, err os.Error) {
+  // Default return argument
+  reply = NewAuthenticationReply( false, -1, "" )
+
   // Escape input
   username = dbConn.Escape( username )
   password := dbConn.Escape( passwordHash )
 
   fmt.Printf( "Authenticating user: '%s:%s'\n", username, password )
 
-  err := dbConn.Query( "SELECT * FROM users WHERE nick = '"+username+"' AND password = '"+password+"' limit 1" )
+  err = dbConn.Query( "SELECT * FROM users WHERE nick = '"+username+"' AND password = '"+password+"' limit 1" )
   if err != nil {
-    fmt.Printf( "Encountered error: %s", err.String() )
-    return NewAuthenticationReply( false, -1, "" ), err
+    return
   }
 
   result, err := dbConn.UseResult()
   defer dbConn.FreeResult()
   if err != nil {
-    fmt.Printf( "Encountered error: %s", err.String() )
-    return NewAuthenticationReply( false, -1, "" ), err
+    return
   }
 
   // Fetch the row
@@ -56,11 +54,12 @@ func Authenticate( username string,
     id       := row["id"].(int64)
     nick     := row["nick"].(string)
 
-    return NewAuthenticationReply( true, id, nick ), nil
+    reply = NewAuthenticationReply( true, id, nick )
+    return
   } else {
-    fmt.Print( "No rows found || Bad username and/or password.\n" )
+    err = os.NewError( "Wrong username or password." )
   }
 
-  return NewAuthenticationReply( false, -1, "" ), os.NewError( "Authentication failed." )
+  return
 }
 
