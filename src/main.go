@@ -106,6 +106,7 @@ func HandleNewClient( conn *net.Conn, dbConn *mysql.Client, userList *list.List)
     fmt.Printf( "Error when authenticating: %s\n", err.String() )
     (*conn).Write( []byte( ERROR_AUTH_FAILED+":Authentication failed.\n" ) )
     (*conn).Close()
+    return
   }
 
   // If the authentication failed
@@ -113,6 +114,7 @@ func HandleNewClient( conn *net.Conn, dbConn *mysql.Client, userList *list.List)
     fmt.Print( "Dropped connection..\n" )
     (*conn).Write( []byte( ERROR_AUTH_FAILED+":Wrong username or password.\n" ) )
     (*conn).Close()
+    return
   }
 
   // User has been authenticated and logged in
