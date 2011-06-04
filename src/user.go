@@ -18,3 +18,8 @@ func NewUser( id int64, username string, conn *net.Conn ) *User {
 }
 
 
+func (u *User) Disconnect() {
+  (*u.Conn).Close()
+  u.Conn = nil
+}
+
