@@ -15,9 +15,10 @@ const (
 
 // Error Codes
 const (
-  ERROR_PROTOCOL       = "100"
-  ERROR_AUTH_FAILED    = "101"
-  ERROR_AUTH_TIMED_OUT = "102"
+  ERROR_PROTOCOL                   = "100"
+  ERROR_AUTH_FAILED                = "101"
+  ERROR_AUTH_TIMED_OUT             = "102"
+  ERROR_USER_CONNECTED_SECOND_TIME = "103" // For cases when user has already connected, but connects again
 )
 
 

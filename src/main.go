@@ -47,6 +47,11 @@ func ParseReply( reply string ) (ret *Reply, err os.Error) {
 
 func ClientReceiver( client *User ) {
   for {
+    if client.Disconnecting {
+      client.Disconnect()
+      break
+    }
+
     line, err := ReadLine( client.Conn )
     if err != nil {
       client.Disconnect()
@@ -134,7 +139,9 @@ func HandleNewClient( conn *net.Conn, dbConn *mysql.Client, userList *list.List)
   fmt.Printf( "User '%s' logged in.\n", username )
   (*conn).Write( []byte( SERVER_USER_AUTHENTICATED+":You have logged in.\n" ) )
 
-  user := NewUser( authReply.Id, username, conn )
+  user := NewUser( authReply.Id, username, conn, userList )
+  // Drop old connections, if any
+  user.DropOldConnections()
   userList.PushFront( user )
   go ClientReceiver( user )
 }
@@ -160,8 +167,14 @@ func main() {
   defer netListen.Close()
 
   for {
-    fmt.Print( "Waiting for client..\n" );
-    conn, err := netListen.Accept();
+    fmt.Print( "Connected users:\n" )
+    users := GetConnectedUsers( userList )
+    for e:= users.Front(); e != nil; e = e.Next() {
+      fmt.Printf( "\t%s\n", e.Value.(string) )
+    }
+
+    fmt.Print( "\nWaiting for client..\n" )
+    conn, err := netListen.Accept()
     if err != nil {
       fmt.Print( "Error encountered when accepting client." )
     }
