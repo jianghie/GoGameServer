@@ -8,6 +8,6 @@ type Game struct {
 
   GameOver bool
 
-  Komi = float
+  Komi float
 }
 
