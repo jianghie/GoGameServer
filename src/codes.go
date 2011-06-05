@@ -8,6 +8,7 @@ const (
 const (
   SERVER_ASK_USERNAME       = "001"
   SERVER_ASK_PASSWORD       = "002"
+  SERVER_MESSAGE            = "005"
   SERVER_USER_AUTHENTICATED = "010"
 )
 

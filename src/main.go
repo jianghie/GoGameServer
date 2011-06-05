@@ -53,7 +53,20 @@ func ClientReceiver( client *User ) {
       break
     }
 
-    fmt.Printf( "%s: %s\n", client.Username, line )
+    reply, err := ParseReply( line )
+    if err != nil {
+      // If errors were encountered, just send a error and wait for next one
+      client.Write( ERROR_PROTOCOL+": Protocol error.\n" )
+      continue
+    }
+    fmt.Printf( "<%s>(%s): %s\n", client.Username, reply.Code, reply.Data )
+
+    // Check for the quit command
+    if reply.Code == USER_QUIT {
+      client.Write( SERVER_MESSAGE+":Bye bye!" )
+      client.Disconnect()
+      break
+    }
   }
 }
 

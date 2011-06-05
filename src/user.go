@@ -2,6 +2,7 @@ package GoGameServer
 
 import (
   "net"
+  "fmt"
 )
 
 
@@ -19,7 +20,13 @@ func NewUser( id int64, username string, conn *net.Conn ) *User {
 
 
 func (u *User) Disconnect() {
+  fmt.Printf( "User '%s' logged out.\n", u.Username )
   (*u.Conn).Close()
   u.Conn = nil
+}
+
+
+func (u *User) Write( msg string ) {
+  (*u.Conn).Write( []byte(msg) )
 }
 
